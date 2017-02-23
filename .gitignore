@@ -1,0 +1,6 @@
+binserver
+
+*.lock
+
+/dist/*
+!.gitkeep
