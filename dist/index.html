@@ -66,7 +66,7 @@
 
         selectionChart
             .width(720)
-            .height(45)
+            .height(65)
             .margins({top: 0, right: 50, bottom: 25, left: 70})
             .x(d3.time.scale().domain([new Date(1985, 0, 1), new Date(2012, 11, 31)]))
             .brushOn(true)
@@ -76,7 +76,7 @@
 
         moveChart.width(720)
                 .height(300)
-                .transitionDuration(1500)
+                .transitionDuration(1)
                 .margins({top: 30, right: 50, bottom: 25, left: 60})
                 .dimension(moveMonths)
                 .rangeChart(selectionChart)
@@ -85,7 +85,7 @@
                 .xUnits(d3.time.months)
                 .elasticY(true)
                 .renderHorizontalGridLines(true)
-                .legend(dc.legend().x(70).y(10).itemHeight(13).gap(5))
+                .legend(dc.legend().x(80).y(10).itemHeight(13).gap(5).horizontal(true).autoItemWidth(true))
                 .brushOn(false)
                 .compose([
                     dc.lineChart(moveChart)
