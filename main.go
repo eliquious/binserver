@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "context"
+	"flag"
 	"github.com/eliquious/xrouter"
 	"github.com/rs/xlog"
 	"github.com/skratchdot/open-golang/open"
@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 )
+
+var debug = flag.Bool("debug", false, "Enables debug logging")
 
 // StaticRoot serves the files in the current directory
 var StaticRoot = http.FileServer(http.Dir("."))
@@ -51,7 +53,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	cfg := xlog.Config{Level: xlog.LevelDebug, Output: xlog.NewConsoleOutput()}
+	flag.Parse()
+
+	level := xlog.LevelError
+	if *debug {
+		level = xlog.LevelInfo
+	}
+
+	cfg := xlog.Config{Level: level, Output: xlog.NewConsoleOutput()}
 	logger := xlog.New(cfg)
 
 	// Create router and install middleware

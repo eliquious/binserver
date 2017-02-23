@@ -4,7 +4,7 @@ binary = $(proj)
 
 default: build
 build: main.go
-	@go-bindata -prefix dist/ dist/...
+	@go-bindata -nomemcopy -nocompress -prefix dist/ dist/...
 	@go build
 
 deps:
