@@ -13,17 +13,40 @@
         #selection-chart g.y {
             display: none;
         }
+        .dc-data-count {
+            margin: 0px;
+            margin-bottom: 24px;
+        }
+        h4 span {
+            font-size:14px;
+            font-weight:normal;
+        }
+        h2 {
+            float: right;
+        }
+        h2 span {
+            font-size:14px;
+            font-weight:normal;
+        }
     </style>
 </head>
 <body>
 
 <div class="container" style="width: 720px">
 <div>
-    <h2>Monthly Index Abs Move &amp; Volume Chart</h2>
+    <h3>Monthly Index Abs Move &amp; Volume Chart</h3>
+    <div class="dc-data-count dc-chart" style="width: 100%">
+        <span style="float: right;">
+            <span class="filter-count"></span>
+                selected out of 
+            <span class="total-count"></span>
+            records | 
+            <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+        </span>
+    </div>
 </div>
 <div class="dc-chart" id="monthly-move-chart"></div>
 <div class="dc-chart" id="selection-chart"></div>
-
 
 <script type="text/javascript">
     var moveChart = dc.compositeChart("#monthly-move-chart");
@@ -39,6 +62,8 @@
         });
 
         var ndx = crossfilter(data);
+        var all = ndx.groupAll();
+
         // monthly index avg fluctuation in percentage
         var moveMonths = ndx.dimension(function (d) {
             return d.month;
@@ -64,20 +89,26 @@
                 }
         );
 
+        // count all the facts
+        dc.dataCount(".dc-data-count")
+            .dimension(ndx)
+            .group(all);
+
         selectionChart
             .width(720)
-            .height(65)
-            .margins({top: 0, right: 50, bottom: 25, left: 70})
+            .height(100)
+            .margins({top: 0, right: 50, bottom: 45, left: 70})
             .x(d3.time.scale().domain([new Date(1985, 0, 1), new Date(2012, 11, 31)]))
             .brushOn(true)
             .dimension(moveMonths)
             .group(indexAvgByMonthGroup)
+            .xAxisLabel("Time")
             .yAxis().ticks(0);
 
         moveChart.width(720)
                 .height(300)
-                .transitionDuration(1)
-                .margins({top: 30, right: 50, bottom: 25, left: 60})
+                .transitionDuration(0)
+                .margins({top: 0, right: 50, bottom: 25, left: 60})
                 .dimension(moveMonths)
                 .rangeChart(selectionChart)
                 .x(d3.time.scale().domain([new Date(1985, 0, 1), new Date(2012, 11, 31)]))
@@ -85,7 +116,7 @@
                 .xUnits(d3.time.months)
                 .elasticY(true)
                 .renderHorizontalGridLines(true)
-                .legend(dc.legend().x(80).y(10).itemHeight(13).gap(5).horizontal(true).autoItemWidth(true))
+                .legend(dc.legend().x(80).y(0).itemHeight(13).gap(5).horizontal(true).autoItemWidth(true))
                 .brushOn(false)
                 .compose([
                     dc.lineChart(moveChart)
