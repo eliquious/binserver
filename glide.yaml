@@ -1,0 +1,7 @@
+package: github.com/eliquious/sandbox/bindata
+import:
+- package: github.com/eliquious/xrouter
+  version: ^2.0.5
+- package: github.com/rs/xlog
+- package: github.com/skratchdot/open-golang
+  version: 75fb7ed4208cf72d323d7d02fd1a5964a7a9073c
