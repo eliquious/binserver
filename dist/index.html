@@ -9,6 +9,11 @@
 	<script type="text/javascript" src="js/d3.js"></script>
 	<script type="text/javascript" src="js/crossfilter.js"></script>
 	<script type="text/javascript" src="js/dc.js"></script>
+    <style type="text/css">
+        #selection-chart g.y {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -16,11 +21,13 @@
 <div>
     <h2>Monthly Index Abs Move &amp; Volume Chart</h2>
 </div>
-<div id="monthly-move-chart"></div>
+<div class="dc-chart" id="monthly-move-chart"></div>
+<div class="dc-chart" id="selection-chart"></div>
 
 
 <script type="text/javascript">
     var moveChart = dc.compositeChart("#monthly-move-chart");
+    var selectionChart = dc.lineChart("#selection-chart");
 
     d3.csv("monthly-move.csv", function (error, data) {
         var dateFormat = d3.time.format("%m/%d/%Y");
@@ -57,13 +64,22 @@
                 }
         );
 
+        selectionChart
+            .width(720)
+            .height(45)
+            .margins({top: 0, right: 50, bottom: 25, left: 70})
+            .x(d3.time.scale().domain([new Date(1985, 0, 1), new Date(2012, 11, 31)]))
+            .brushOn(true)
+            .dimension(moveMonths)
+            .group(indexAvgByMonthGroup)
+            .yAxis().ticks(0);
+
         moveChart.width(720)
                 .height(300)
                 .transitionDuration(1500)
                 .margins({top: 30, right: 50, bottom: 25, left: 60})
                 .dimension(moveMonths)
-                .mouseZoomable(true)
-                .shareTitle(false)
+                .rangeChart(selectionChart)
                 .x(d3.time.scale().domain([new Date(1985, 0, 1), new Date(2012, 11, 31)]))
                 .round(d3.time.month.round)
                 .xUnits(d3.time.months)
@@ -91,8 +107,7 @@
                             .useRightYAxis(true)
                 ])
                 .yAxisLabel("Monthly Index Average")
-                .rightYAxisLabel("Monthly Index Move")
-                .renderHorizontalGridLines(true);
+                .rightYAxisLabel("Monthly Index Move");
 
         dc.renderAll();
     });
