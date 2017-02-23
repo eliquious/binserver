@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"github.com/eliquious/xrouter"
 	"github.com/rs/xlog"
 	"github.com/skratchdot/open-golang/open"
@@ -13,9 +13,12 @@ import (
 	"time"
 )
 
+// StaticRoot serves the files in the current directory
+var StaticRoot = http.FileServer(http.Dir("."))
+
 // Handler is the default HTTP handler.
-func Handler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	logger := xlog.FromContext(ctx)
+func Handler(w http.ResponseWriter, r *http.Request) {
+	logger := xlog.FromRequest(r)
 
 	// Get file path
 	path := strings.Replace(r.URL.Path, "/", "", 1)
@@ -23,19 +26,26 @@ func Handler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		path = "index.html"
 	}
 
+	if strings.HasSuffix(path, ".css") {
+		w.Header().Set("Content-Type", "text/css; charset=utf-8")
+	} else if strings.HasSuffix(path, "js") {
+		w.Header().Set("Content-Type", "application/x-javascript")
+	} else {
+		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(path)))
+	}
+
 	// Read asset from memory
 	bytes, err := Asset(path)
 	if err == nil {
 		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(r.URL.Path)))
 		w.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
 		w.Write(bytes)
 		return
 	}
-	logger.Error(err)
+	logger.Debug("Loading from disk...")
 
 	// Serve files from .
-	static.ServeHTTP(w, r)
+	StaticRoot.ServeHTTP(w, r)
 
 	return
 }
@@ -59,8 +69,7 @@ func main() {
 	})
 	r.Use(xlog.URLHandler("path"))
 	r.Use(xlog.MethodHandler("method"))
-	r.GET("/", Handler)
-	r.StaticRoot(http.FileServer(http.Dir(".")))
+	r.NotFound(http.HandlerFunc(Handler))
 
 	logger.Info("Serving on port 8080")
 	go open.Run("http://localhost:8080")
