@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-var static = http.FileServer(http.Dir("."))
-
 // Handler is the default HTTP handler.
 func Handler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	logger := xlog.FromContext(ctx)
@@ -62,7 +60,7 @@ func main() {
 	r.Use(xlog.URLHandler("path"))
 	r.Use(xlog.MethodHandler("method"))
 	r.GET("/", Handler)
-	r.StaticRoot(static)
+	r.StaticRoot(http.FileServer(http.Dir(".")))
 
 	logger.Info("Serving on port 8080")
 	go open.Run("http://localhost:8080")
